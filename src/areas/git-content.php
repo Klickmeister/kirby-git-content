@@ -161,6 +161,9 @@ return [
                         'helpText' => option('thathoff.git-content.helpText'),
                         'branch' => $git->getCurrentBranch(),
                         'status' => $git->status(), // is associative array consisting of changed files and whether repo is ahead/behind to origin
+                        'allowPush' => (bool)option('thathoff.git-content.allowPush', true),
+                        'allowPull' => (bool)option('thathoff.git-content.allowPull', true),
+                        'prodUrl' => option('thathoff.git-content.prodUrl', ''),
                     ],
                 ];
             }

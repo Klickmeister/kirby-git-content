@@ -32,5 +32,8 @@ Kirby::plugin('thathoff/git-content', [
         'displayErrors'    => null,
         'disableBranchManagement' => null,
         'disable'          => null,
+        'allowPush'        => null,
+        'allowPull'        => null,
+        'liveUrl'          => null,
     ],
 ]);

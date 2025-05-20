@@ -22,8 +22,9 @@
 
     <k-section
       :buttons="[
-        { text: 'Pull', icon: 'download', click: pull },
-        { text: 'Push', icon: 'upload', click: push },
+        { text: 'Pull', icon: 'download', click: pull, disabled: !allowPull },
+        { text: 'Push', icon: 'upload', click: push, disabled: !allowPush },
+        ...(prodUrl ? [{ text: 'Deploy to Live', icon: 'plane', click: deployToLive }] : []),
       ]"
       label="Remote synchronization"
     >
@@ -42,10 +43,10 @@
   </k-panel-inside>
 </template>
 <script>
-import formatDistance from "date-fns/formatDistance";
+import formatDistance from 'date-fns/formatDistance';
 
 export default {
-  name: "GitContent",
+  name: 'GitContent',
   props: {
     status: {
       type: Object,
@@ -56,13 +57,25 @@ export default {
     },
     branch: {
       type: String,
-      default: "",
+      default: '',
     },
     disableBranchManagement: {
       type: Boolean,
       default: false,
     },
     helpText: {},
+    allowPush: {
+      type: Boolean,
+      default: true,
+    },
+    allowPull: {
+      type: Boolean,
+      default: true,
+    },
+    prodUrl: {
+      type: String,
+      default: '',
+    },
   },
   computed: {
     commitItems() {
@@ -71,12 +84,7 @@ export default {
       this.log.forEach((commit) => {
         items.push({
           text: commit.message,
-          info:
-            this.formatRelative(commit.date)
-            + " / "
-            + commit.author
-            + " / "
-            + commit.hash.substr(0, 7),
+          info: this.formatRelative(commit.date) + ' / ' + commit.author + ' / ' + commit.hash.substr(0, 7),
           link: false,
         });
       });
@@ -99,55 +107,80 @@ export default {
     remoteStatus() {
       if (!this.status.hasRemote) {
         return {
-          text: "No remote branch found.",
-          theme: "negative",
+          text: 'No remote branch found.',
+          theme: 'negative',
         };
       }
 
       if (this.status.diffFromOrigin === 0) {
         return {
-          text: "Your branch is up to date with origin/" + this.branch,
-          theme: "positive",
+          text: 'Your branch is up to date with origin/' + this.branch,
+          theme: 'positive',
         };
       }
 
       const absDiff = Math.abs(this.status.diffFromOrigin);
 
       return {
-        text: `Your branch is ${
-          this.status.diffFromOrigin > 0 ? "ahead" : "behind"
-        } of origin/${this.branch} by ${absDiff} commit${
-          absDiff !== 1 ? "s" : ""
-        }.`,
-        theme: "notice",
+        text: `Your branch is ${this.status.diffFromOrigin > 0 ? 'ahead' : 'behind'} of origin/${
+          this.branch
+        } by ${absDiff} commit${absDiff !== 1 ? 's' : ''}.`,
+        theme: 'notice',
       };
     },
   },
   methods: {
     pull: async function () {
-      await panel.app.$api.post("/git-content/pull");
+      await panel.app.$api.post('/git-content/pull');
       this.$reload();
     },
     push: async function () {
-      await panel.app.$api.post("/git-content/push");
+      await panel.app.$api.post('/git-content/push');
       this.$reload();
     },
     revert: async function () {
-      this.$dialog("git-content/revert");
+      this.$dialog('git-content/revert');
     },
     commit: async function () {
-      this.$dialog("git-content/commit");
+      this.$dialog('git-content/commit');
     },
     switchBranch: async function () {
-      this.$dialog("git-content/branch");
+      this.$dialog('git-content/branch');
     },
     createBranch: async function () {
-      this.$dialog("git-content/create-branch");
+      this.$dialog('git-content/create-branch');
     },
     formatRelative(date) {
       return formatDistance(new Date(date), new Date(), {
         addSuffix: true,
       });
+    },
+    deployToLive: async function () {
+      if (!this.prodUrl) return;
+
+      try {
+        this.$dialog({
+          text: 'Are you sure you want to deploy content to the live site?',
+          button: 'Deploy',
+          icon: 'server',
+        }).then(async () => {
+          const response = await fetch(
+            `${this.prodUrl}/git-content/pull?secret=${encodeURIComponent(panel.system.api.csrf)}`,
+            {
+              method: 'POST',
+            }
+          );
+
+          if (response.ok) {
+            this.$store.dispatch('notification/success', 'Content successfully deployed to live site');
+          } else {
+            this.$store.dispatch('notification/error', 'Failed to deploy content to live site');
+          }
+        });
+      } catch (error) {
+        this.$store.dispatch('notification/error', 'Error connecting to live site');
+        console.error(error);
+      }
     },
   },
 };
