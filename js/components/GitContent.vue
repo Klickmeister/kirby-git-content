@@ -168,27 +168,27 @@ export default {
 
       try {
         this.$dialog({
-          text: 'Are you sure you want to deploy content to the live site?',
+          text: 'Are you sure you want to deploy content to production?',
           button: 'Deploy',
           icon: 'server',
         }).then(async () => {
           const url = this.cronHooksSecret
-            ? `${this.liveUrl}/git-content/pull?secret=${encodeURIComponent(this.cronHooksSecret)}`
-            : `${this.liveUrl}/git-content/pull`;
+            ? `${this.prodUrl}/git-content/pull?secret=${encodeURIComponent(this.cronHooksSecret)}`
+            : `${this.prodUrl}/git-content/pull`;
 
           const response = await fetch(url, {
             method: 'POST',
           });
 
           if (response.ok) {
-            this.$store.dispatch('notification/success', 'Content successfully deployed to production site');
+            this.$store.dispatch('notification/success', 'Content successfully deployed to production.');
           } else {
             const data = await response.json();
             this.$store.dispatch('notification/error', `Failed to deploy: ${data.message || 'Unknown error'}`);
           }
         });
       } catch (error) {
-        this.$store.dispatch('notification/error', 'Error connecting to production site');
+        this.$store.dispatch('notification/error', 'Error connecting to production.');
         console.error(error);
       }
     },
