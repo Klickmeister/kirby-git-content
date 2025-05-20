@@ -164,6 +164,7 @@ return [
                         'allowPush' => (bool)option('thathoff.git-content.allowPush', true),
                         'allowPull' => (bool)option('thathoff.git-content.allowPull', true),
                         'prodUrl' => option('thathoff.git-content.prodUrl', ''),
+                        'cronHooksSecret' => option('thathoff.git-content.cronHooksSecret', ''),
                     ],
                 ];
             }

@@ -24,7 +24,7 @@
       :buttons="[
         ...(allowPull ? [{ text: 'Pull', icon: 'download', click: pull }] : []),
         ...(allowPush ? [{ text: 'Push', icon: 'upload', click: push }] : []),
-        ...(prodUrl ? [{ text: 'Deploy to Live', icon: 'plane', click: deployToLive }] : []),
+        ...(prodUrl ? [{ text: 'Deploy to Live', icon: 'plane', click: deployToProd }] : []),
       ]"
       label="Remote synchronization"
     >
@@ -77,6 +77,10 @@ export default {
       default: true,
     },
     prodUrl: {
+      type: String,
+      default: '',
+    },
+    cronHooksSecret: {
       type: String,
       default: '',
     },
@@ -159,7 +163,7 @@ export default {
         addSuffix: true,
       });
     },
-    deployToLive: async function () {
+    deployToProd: async function () {
       if (!this.prodUrl) return;
 
       try {
@@ -168,21 +172,23 @@ export default {
           button: 'Deploy',
           icon: 'server',
         }).then(async () => {
-          const response = await fetch(
-            `${this.prodUrl}/git-content/pull?secret=${encodeURIComponent(panel.system.api.csrf)}`,
-            {
-              method: 'POST',
-            }
-          );
+          const url = this.cronHooksSecret
+            ? `${this.liveUrl}/git-content/pull?secret=${encodeURIComponent(this.cronHooksSecret)}`
+            : `${this.liveUrl}/git-content/pull`;
+
+          const response = await fetch(url, {
+            method: 'POST',
+          });
 
           if (response.ok) {
-            this.$store.dispatch('notification/success', 'Content successfully deployed to live site');
+            this.$store.dispatch('notification/success', 'Content successfully deployed to production site');
           } else {
-            this.$store.dispatch('notification/error', 'Failed to deploy content to live site');
+            const data = await response.json();
+            this.$store.dispatch('notification/error', `Failed to deploy: ${data.message || 'Unknown error'}`);
           }
         });
       } catch (error) {
-        this.$store.dispatch('notification/error', 'Error connecting to live site');
+        this.$store.dispatch('notification/error', 'Error connecting to production site');
         console.error(error);
       }
     },
