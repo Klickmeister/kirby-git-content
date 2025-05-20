@@ -32,6 +32,7 @@
     </k-section>
 
     <k-section
+      v-if="!disableBranchManagement"
       :buttons="[
         { text: 'Create Branch', icon: 'add', click: createBranch },
         { text: 'Switch Branch', icon: 'refresh', click: switchBranch },
