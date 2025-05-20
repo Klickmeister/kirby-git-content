@@ -1,6 +1,7 @@
 <?php
 
 use Thathoff\GitContent\KirbyGitHelper;
+use Kirby\Http\Remote;
 
 return [
     'label' => option('thathoff.git-content.menuLabel', 'Git Content'),
@@ -132,6 +133,45 @@ return [
                 return true;
             }
         ],
+        'git-content.deployToProd' => [
+            'pattern' => 'git-content/deploy-to-prod',
+            'load' => fn () => [
+                'component' => 'k-remove-dialog',
+                'props' => [
+                    'text' => 'Are you sure you want to deploy content to production?<br><br>This will pull the latest changes on the live server.',
+                    'submitButton' => 'Deploy to production',
+                    'icon' => 'server',
+                ]
+            ],
+            'submit' => function () {
+                $prodUrl = option('thathoff.git-content.prodUrl', '');
+                $secret = option('thathoff.git-content.cronHooksSecret', '');
+                
+                if (empty($prodUrl)) {
+                    throw new Exception('Live URL is not configured');
+                }
+                
+                // create the URL for the remote call
+                $url = $secret ? 
+                    $prodUrl . '/git-content/pull?secret=' . urlencode($secret) : 
+                    $prodUrl . '/git-content/pull';
+                
+                // make the remote call
+                try {
+                    $response = Remote::get($url);
+                    
+                    if ($response->code() !== 200) {
+                        throw new Exception('Failed to deploy: ' . $response->content());
+                    }
+                    
+                    return [
+                        'message' => 'Content successfully deployed to live site'
+                    ];
+                } catch (Exception $e) {
+                    throw new Exception('Error connecting to live site: ' . $e->getMessage());
+                }
+            }
+        ],
     ],
     'views' => [
         [
@@ -164,7 +204,6 @@ return [
                         'allowPush' => (bool)option('thathoff.git-content.allowPush', true),
                         'allowPull' => (bool)option('thathoff.git-content.allowPull', true),
                         'prodUrl' => option('thathoff.git-content.prodUrl', ''),
-                        'cronHooksSecret' => option('thathoff.git-content.cronHooksSecret', ''),
                     ],
                 ];
             }
