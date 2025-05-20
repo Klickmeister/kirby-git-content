@@ -22,8 +22,8 @@
 
     <k-section
       :buttons="[
-        { text: 'Pull', icon: 'download', click: pull, disabled: !allowPull },
-        { text: 'Push', icon: 'upload', click: push, disabled: !allowPush },
+        ...(allowPull ? [{ text: 'Pull', icon: 'download', click: pull }] : []),
+        ...(allowPush ? [{ text: 'Push', icon: 'upload', click: push }] : []),
         ...(prodUrl ? [{ text: 'Deploy to Live', icon: 'plane', click: deployToLive }] : []),
       ]"
       label="Remote synchronization"
@@ -32,11 +32,14 @@
     </k-section>
 
     <k-section
-      v-if="!disableBranchManagement"
-      :buttons="[
-        { text: 'Create Branch', icon: 'add', click: createBranch },
-        { text: 'Switch Branch', icon: 'refresh', click: switchBranch },
-      ]"
+      :buttons="
+        !disableBranchManagement
+          ? [
+              { text: 'Create Branch', icon: 'add', click: createBranch },
+              { text: 'Switch Branch', icon: 'refresh', click: switchBranch },
+            ]
+          : []
+      "
       :label="`Latest ${log.length} changes on branch »${branch}«`"
     >
       <k-collection :items="commitItems" />
