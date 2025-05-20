@@ -133,14 +133,15 @@ return [
                 return true;
             }
         ],
-        'git-content.deployToProd' => [
-            'pattern' => 'git-content/deploy-to-prod',
+        'git-content.syncProd' => [
+            'pattern' => 'git-content/sync-prod',
             'load' => fn () => [
                 'component' => 'k-remove-dialog',
                 'props' => [
-                    'text' => 'Are you sure you want to deploy content to production?<br><br>This will pull the latest changes on the live server.',
-                    'submitButton' => 'Deploy to production',
+                    'text' => 'Are you sure you want to sync the latest changes on production?',
+                    'submitButton' => 'Sync Content',
                     'icon' => 'server',
+                    'theme' => 'positive',
                 ]
             ],
             'submit' => function () {
@@ -148,7 +149,7 @@ return [
                 $secret = option('thathoff.git-content.cronHooksSecret', '');
                 
                 if (empty($prodUrl)) {
-                    throw new Exception('Live URL is not configured');
+                    throw new Exception('Prod URL is not configured');
                 }
                 
                 // create the URL for the remote call
@@ -161,14 +162,14 @@ return [
                     $response = Remote::get($url);
                     
                     if ($response->code() !== 200) {
-                        throw new Exception('Failed to deploy: ' . $response->content());
+                        throw new Exception('Failed to sync: ' . $response->content());
                     }
                     
                     return [
-                        'message' => 'Content successfully deployed to live site'
+                        'message' => 'Content successfully synced on production.',
                     ];
                 } catch (Exception $e) {
-                    throw new Exception('Error connecting to live site: ' . $e->getMessage());
+                    throw new Exception('Error connecting to production: ' . $e->getMessage());
                 }
             }
         ],

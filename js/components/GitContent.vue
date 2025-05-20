@@ -24,7 +24,7 @@
       :buttons="[
         ...(allowPull ? [{ text: 'Pull', icon: 'download', click: pull }] : []),
         ...(allowPush ? [{ text: 'Push', icon: 'upload', click: push }] : []),
-        ...(prodUrl ? [{ text: 'Deploy to Live', icon: 'plane', click: deployToProd }] : []),
+        ...(prodUrl ? [{ text: 'Sync Content', icon: 'plane', click: syncProd }] : []),
       ]"
       label="Remote synchronization"
     >
@@ -160,8 +160,8 @@ export default {
         addSuffix: true,
       });
     },
-    deployToProd: function () {
-      this.$dialog('git-content/deploy-to-prod');
+    syncProd: function () {
+      this.$dialog('git-content/sync-prod');
     },
   },
 };
