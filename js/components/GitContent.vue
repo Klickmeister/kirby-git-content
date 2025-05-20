@@ -31,8 +31,6 @@
       <k-box :text="remoteStatus.text" :theme="remoteStatus.theme" />
     </k-section>
 
-    {{ encodeURIComponent(panel.system.api.csrf) }}
-
     <k-section
       :buttons="
         !disableBranchManagement
