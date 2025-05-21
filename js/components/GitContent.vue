@@ -22,6 +22,7 @@
 
     <k-section
       :buttons="[
+        { text: 'Refresh Status', icon: 'refresh', click: refreshStatus },
         ...(allowPull ? [{ text: 'Pull', icon: 'download', click: pull }] : []),
         ...(allowPush ? [{ text: 'Push', icon: 'upload', click: push }] : []),
         ...(prodUrl ? [{ text: 'Sync Content', icon: 'plane', click: syncProd }] : []),
@@ -162,6 +163,10 @@ export default {
     },
     syncProd: function () {
       this.$dialog('git-content/sync-prod');
+    },
+    refreshStatus: async function () {
+      await panel.app.$api.post('/git-content/refresh');
+      this.$reload();
     },
   },
 };

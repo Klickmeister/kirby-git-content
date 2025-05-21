@@ -44,6 +44,13 @@ class KirbyGit
                 'action' => function () use ($kirbyGit) {
                     return $kirbyGit->httpGitHelperAction('status', null); // response message is response of 'git status'
                 }
+            ],
+            [
+                'pattern' => 'git-content/refresh',
+                'method' => 'POST',
+                'action' => function () use ($kirbyGit) {
+                    return $kirbyGit->httpGitHelperAction('fetch', "Successfully refreshed remote status");
+                }
             ]
         ];
     }
