@@ -173,6 +173,17 @@ class KirbyGitHelper
            the first code character always refers to the index state of the file, the second for the worktree
            for more info refer to https://git-scm.com/docs/git-status#_short_format
         */
+        
+        // do a git fetch first to get the latest remote information
+        try {
+            $this->getRepo()->execute('fetch', '--quiet');
+        } catch (GitException $e) {
+            // ignore errors here, we just want to make sure we have the latest remote information
+            // only write log in error log
+            error_log('Git fetch error: ' . $e->getMessage());
+        }
+
+
         $upstreamResponse = $this->getRepo()->execute('status',  '--porcelain=2', '--branch');
         $filesResponse = $this->getRepo()->execute('status', '--porcelain');
 
